@@ -6,8 +6,15 @@ import History from './components/History'
 
 function App() {
   const [activeTab, setActiveTab] = useState('upload')
+  // refreshToken: Incremented each time a meal is saved to trigger re-fetch in Dashboard/History
+  // This creates a simple sync mechanism without prop drilling or global state
   const [refreshToken, setRefreshToken] = useState(0)
 
+  /**
+   * Sync callback: Triggered when Upload component saves a new meal
+   * Increments refreshToken to signal Dashboard and History to re-fetch their data
+   * This ensures the UI stays in sync with the database after meal creation
+   */
   const handleMealSaved = () => {
     setRefreshToken((current) => current + 1)
   }

@@ -12,10 +12,10 @@ CalSnap is a full-stack nutrition tracker. The frontend lets users upload a meal
 ```mermaid
 flowchart LR
   U[User] -->|Browser| FE[React + Vite SPA]
-  FE -->|POST /api/analyze (image)| BE[FastAPI API]
-  FE -->|POST /api/meals (JSON)| BE
-  FE -->|GET /api/meals?date=YYYY-MM-DD| BE
-  FE -->|GET /api/summary?date=YYYY-MM-DD| BE
+  FE -->|POST /api/analyze image| BE[FastAPI API]
+  FE -->|POST /api/meals JSON| BE
+  FE -->|GET /api/meals| BE
+  FE -->|GET /api/summary| BE
   BE --> DB[(SQLite: meals.db)]
 ```
 

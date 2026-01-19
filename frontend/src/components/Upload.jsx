@@ -39,11 +39,20 @@ function Upload({ onMealSaved }) {
     }
   }
 
+  /**
+   * Creates a new meal entry by sending a POST request to the backend API.
+   * This function:
+   * 1. Sends meal data (nutrition info, date, type) to /api/meals endpoint
+   * 2. Persists the meal to the SQLite database via the backend
+   * 3. Triggers a refresh of Dashboard/History components through onMealSaved callback
+   * 4. Resets the upload form upon successful save
+   */
   const handleSaveMeal = async () => {
     if (!result) return
 
     setSaving(true)
     try {
+      // POST request to create a new meal entry in the database
       const response = await fetch('http://localhost:8000/api/meals', {
         method: 'POST',
         headers: {
@@ -64,6 +73,8 @@ function Upload({ onMealSaved }) {
         alert('Meal saved successfully!')
         setFile(null)
         setResult(null)
+        // Trigger sync: Call parent callback to refresh Dashboard and History components
+        // This increments refreshToken in App.jsx, which causes child components to re-fetch data
         if (onMealSaved) {
           onMealSaved()
         }
