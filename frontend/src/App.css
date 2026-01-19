@@ -112,6 +112,20 @@
   justify-content: space-between;
 }
 
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.toggle-row input {
+  width: 18px;
+  height: 18px;
+}
+
 .result-section {
   margin-top: 2rem;
 }
@@ -390,6 +404,52 @@
   color: var(--ink-3);
   padding: 2rem;
   font-style: italic;
+}
+
+.meals-preview {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--panel-border);
+}
+
+.meals-preview h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--ink-1);
+}
+
+.meals-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.meal-item-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(240, 199, 167, 0.6);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.meal-item-compact:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateX(4px);
+}
+
+.meal-name {
+  font-weight: 600;
+  color: var(--ink-1);
+  font-size: 1rem;
+}
+
+.meal-calories {
+  color: var(--accent-1);
+  font-weight: 700;
+  font-size: 0.95rem;
 }
 
 @keyframes fade-up {

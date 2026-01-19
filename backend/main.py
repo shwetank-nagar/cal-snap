@@ -6,12 +6,10 @@ from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel
 from datetime import date
 from typing import Optional, Dict
-import base64
-import json
-from config import settings
 
 # Database setup
-engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
+SQLALCHEMY_DATABASE_URL = "sqlite:///./meals.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -59,81 +57,29 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_allow_origins,
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-def classify_food_with_openai(image_bytes: bytes) -> Dict[str, float | str]:
-    if not settings.use_openai_analysis:
-        return {"label": "Sample Meal", "confidence": 0.72}
-
-    try:
-        from openai import OpenAI
-    except ImportError as exc:
-        raise RuntimeError("openai package not installed. Run: pip install openai") from exc
-
-    if not settings.openai_api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set")
-
-    client = OpenAI(api_key=settings.openai_api_key)
-    encoded_image = base64.b64encode(image_bytes).decode("utf-8")
-
-    response = client.responses.create(
-        model=settings.openai_model,
-        input=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": (
-                            "Identify the primary food in the image. "
-                            "Return JSON only with keys: label (string), confidence (0-1)."
-                        ),
-                    },
-                    {"type": "input_image", "image_base64": encoded_image},
-                ],
-            }
-        ],
-        temperature=0.2,
-    )
-
-    raw_text = response.output_text.strip()
-    try:
-        data = json.loads(raw_text)
-        return {
-            "label": str(data.get("label", "Unknown")),
-            "confidence": float(data.get("confidence", 0.5)),
-        }
-    except json.JSONDecodeError:
-        return {"label": "Unknown", "confidence": 0.5}
-
-
-def lookup_nutrition(food_label: str) -> Dict[str, float]:
-    normalized = food_label.strip().lower()
-    sample_table = {
-        "sample meal": {"calories": 520, "protein": 32, "carbs": 45, "fat": 18},
-        "chicken salad": {"calories": 350, "protein": 30, "carbs": 18, "fat": 16},
-        "avocado toast": {"calories": 290, "protein": 8, "carbs": 28, "fat": 17},
-    }
-    return sample_table.get(normalized, {"calories": 400, "protein": 20, "carbs": 40, "fat": 15})
-
-
 @app.post("/api/analyze")
 async def analyze_food(file: UploadFile = File(...)):
+    # Simple mock analysis - returns sample data
+    # In production, this would use AI/ML model to analyze the image
     image_bytes = await file.read()
-    classification = classify_food_with_openai(image_bytes)
-    nutrition = lookup_nutrition(classification["label"])
-
+    
+    # Extract meal name from filename (remove extension)
+    meal_name = file.filename.rsplit('.', 1)[0] if file.filename else "Sample Meal"
+    
+    # Return mock nutrition data with the filename as the meal name
     return {
-        "food": classification["label"],
-        "calories": nutrition["calories"],
-        "protein": nutrition["protein"],
-        "carbs": nutrition["carbs"],
-        "fat": nutrition["fat"],
-        "confidence": classification["confidence"],
+        "food": meal_name,
+        "calories": 520,
+        "protein": 32,
+        "carbs": 45,
+        "fat": 18,
+        "confidence": 0.72
     }
 
 @app.post("/api/meals", response_model=MealResponse)

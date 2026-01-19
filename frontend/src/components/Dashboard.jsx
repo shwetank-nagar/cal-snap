@@ -3,20 +3,26 @@ import { useState, useEffect } from 'react'
 function Dashboard({ refreshToken }) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [summary, setSummary] = useState(null)
+  const [meals, setMeals] = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetchSummary()
+    fetchData()
   }, [selectedDate, refreshToken])
 
-  const fetchSummary = async () => {
+  const fetchData = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/summary?date=${selectedDate}`)
-      const data = await response.json()
-      setSummary(data)
+      const [summaryRes, mealsRes] = await Promise.all([
+        fetch(`http://localhost:8000/api/summary?date=${selectedDate}`),
+        fetch(`http://localhost:8000/api/meals?date=${selectedDate}`)
+      ])
+      const summaryData = await summaryRes.json()
+      const mealsData = await mealsRes.json()
+      setSummary(summaryData)
+      setMeals(mealsData)
     } catch (error) {
-      console.error('Error fetching summary:', error)
+      console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
     }
@@ -85,6 +91,20 @@ function Dashboard({ refreshToken }) {
 
           {summary.meal_count === 0 && (
             <p className="empty-message">No meals recorded for this date.</p>
+          )}
+
+          {meals.length > 0 && (
+            <div className="meals-preview">
+              <h3>Meals Today</h3>
+              <div className="meals-list-compact">
+                {meals.map((meal) => (
+                  <div key={meal.id} className="meal-item-compact">
+                    <span className="meal-name">{meal.food}</span>
+                    <span className="meal-calories">{meal.calories} kcal</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       ) : null}

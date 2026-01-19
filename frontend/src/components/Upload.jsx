@@ -7,6 +7,7 @@ function Upload({ onMealSaved }) {
   const [saving, setSaving] = useState(false)
   const [mealType, setMealType] = useState('breakfast')
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [useLLM, setUseLLM] = useState(false)
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0])
@@ -21,7 +22,10 @@ function Upload({ onMealSaved }) {
     formData.append('file', file)
 
     try {
-      const response = await fetch('http://localhost:8000/api/analyze', {
+      const analyzeUrl = useLLM
+        ? 'http://localhost:8000/api/analyze?use_llm=true'
+        : 'http://localhost:8000/api/analyze'
+      const response = await fetch(analyzeUrl, {
         method: 'POST',
         body: formData,
       })
@@ -85,6 +89,15 @@ function Upload({ onMealSaved }) {
           onChange={handleFileChange}
           className="file-input"
         />
+
+        <label className="toggle-row">
+          <input
+            type="checkbox"
+            checked={useLLM}
+            onChange={(e) => setUseLLM(e.target.checked)}
+          />
+          Use AI vision analysis (falls back to sample if not configured)
+        </label>
         
         {file && (
           <div className="file-preview">
