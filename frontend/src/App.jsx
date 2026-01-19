@@ -1,34 +1,52 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import Upload from './components/Upload'
+import Dashboard from './components/Dashboard'
+import History from './components/History'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [activeTab, setActiveTab] = useState('upload')
+  const [refreshToken, setRefreshToken] = useState(0)
+
+  const handleMealSaved = () => {
+    setRefreshToken((current) => current + 1)
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="app">
+      <header className="app-header">
+        <p className="app-kicker">Daily nutrition snapshots</p>
+        <h1>CalSnap</h1>
+        <p className="app-subtitle">Upload meals, track macros, and stay on target.</p>
+      </header>
+
+      <nav className="nav-tabs">
+        <button
+          className={activeTab === 'upload' ? 'active' : ''}
+          onClick={() => setActiveTab('upload')}
+        >
+          Upload
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+        <button
+          className={activeTab === 'dashboard' ? 'active' : ''}
+          onClick={() => setActiveTab('dashboard')}
+        >
+          Dashboard
+        </button>
+        <button
+          className={activeTab === 'history' ? 'active' : ''}
+          onClick={() => setActiveTab('history')}
+        >
+          History
+        </button>
+      </nav>
+
+      <main className="app-main">
+        {activeTab === 'upload' && <Upload onMealSaved={handleMealSaved} />}
+        {activeTab === 'dashboard' && <Dashboard refreshToken={refreshToken} />}
+        {activeTab === 'history' && <History refreshToken={refreshToken} />}
+      </main>
+    </div>
   )
 }
 
